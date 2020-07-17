@@ -15,7 +15,6 @@
 package com.mozilla.presto.hyperloglog;
 
 import com.facebook.presto.Session;
-import com.facebook.presto.metadata.InMemoryNodeManager;
 import com.facebook.presto.spi.type.Type;
 import com.facebook.presto.testing.LocalQueryRunner;
 import com.facebook.presto.tests.AbstractTestQueryFramework;
@@ -29,45 +28,42 @@ import static com.facebook.presto.testing.TestingSession.testSessionBuilder;
 import static com.facebook.presto.tpch.TpchMetadata.TINY_SCHEMA_NAME;
 
 public class TestHyperLogLogQueries
-        extends AbstractTestQueryFramework
-{
-    public TestHyperLogLogQueries()
-    {
-        super(createLocalQueryRunner());
+        extends AbstractTestQueryFramework {
+    public TestHyperLogLogQueries() {
+        super(TestHyperLogLogQueries::createLocalQueryRunner);
     }
 
     @Test
     public void testHyperLogLogMerge()
-            throws Exception
-    {
-        assertQuery("select cardinality(merge(hll_create(v, 10))) from (values ('foo'), ('bar'), ('foo')) as t(v)", "select 2");
+            throws Exception {
+        assertQuery("select hll_cardinality(hll_merge(hll_create(v, 10))) from (values ('foo'), ('bar'), ('foo')) as t(v)", "select 2");
     }
 
     @Test
     public void testHyperLogLogGroupMerge()
-            throws Exception
-    {
-        assertQuery("select k, cardinality(merge(hll_create(v, 10))) from (values ('US', 'foo'), ('US', 'bar'), ('IT', 'foo')) as t(k, v) group by k",
+            throws Exception {
+        assertQuery("select k, hll_cardinality(hll_merge(hll_create(v, 10))) from (values ('US', 'foo'), ('US', 'bar'), ('IT', 'foo')) as t(k, v) group by k",
                 "select * from (values ('US', 2), ('IT', 1))");
     }
 
     @Test
     public void testHyperLogLogCast()
-        throws Exception
-    {
-        assertQuery("select cardinality(cast(cast(hll_create('foo', 4) as varbinary) as HLL))", "select 1");
+            throws Exception {
+        assertQuery("select hll_cardinality(cast(cast(hll_create('foo', 4) as varbinary) as HLL))", "select 1");
     }
 
-    private static LocalQueryRunner createLocalQueryRunner()
-    {
-        Session defaultSession = testSessionBuilder()
+    private static LocalQueryRunner createLocalQueryRunner() {
+        Session.SessionBuilder sessionBuilder = testSessionBuilder()
                 .setCatalog("tpch")
                 .setSchema(TINY_SCHEMA_NAME)
-                .build();
+                .setSystemProperty("task_concurrency", "1");
 
-        LocalQueryRunner localQueryRunner = new LocalQueryRunner(defaultSession);
-        InMemoryNodeManager nodeManager = localQueryRunner.getNodeManager();
-        localQueryRunner.createCatalog("tpch", new TpchConnectorFactory(nodeManager, 1), ImmutableMap.<String, String>of());
+
+        LocalQueryRunner localQueryRunner = new LocalQueryRunner(sessionBuilder.build());
+
+        localQueryRunner.createCatalog(localQueryRunner.getDefaultSession().getCatalog().get(),
+                new TpchConnectorFactory(1),
+                ImmutableMap.of());
 
         HyperLogLogPlugin plugin = new HyperLogLogPlugin();
         for (Type type : plugin.getTypes()) {
