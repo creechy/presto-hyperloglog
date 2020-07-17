@@ -14,9 +14,7 @@
 
 package com.mozilla.presto.hyperloglog;
 
-import com.facebook.presto.operator.aggregation.state.StateCompiler;
 import com.facebook.presto.spi.block.BlockBuilder;
-import com.facebook.presto.spi.function.AccumulatorStateSerializer;
 import com.facebook.presto.spi.function.AggregationFunction;
 import com.facebook.presto.spi.function.CombineFunction;
 import com.facebook.presto.spi.function.InputFunction;
@@ -25,12 +23,11 @@ import com.facebook.presto.spi.function.SqlType;
 import com.twitter.algebird.DenseHLL;
 import com.twitter.algebird.HyperLogLog;
 import io.airlift.slice.Slice;
+import io.airlift.slice.Slices;
 
-@AggregationFunction("merge")
+@AggregationFunction("hll_merge")
 public final class HyperLogLogAggregation
 {
-    private static final AccumulatorStateSerializer<HyperLogLogState> serializer = new StateCompiler().generateStateSerializer(HyperLogLogState.class);
-
     private HyperLogLogAggregation() {}
 
     @InputFunction
@@ -66,6 +63,12 @@ public final class HyperLogLogAggregation
     @OutputFunction(HyperLogLogType.TYPE)
     public static void output(HyperLogLogState state, BlockBuilder out)
     {
-        serializer.serialize(state, out);
+        if (state.getHyperLogLog() == null) {
+            out.appendNull();
+        }
+        else {
+            Slice slice = Slices.wrappedBuffer(HyperLogLog.toBytes(state.getHyperLogLog()));
+            HyperLogLogType.HYPER_LOG_LOG.writeSlice(out, slice);
+        }
     }
 }

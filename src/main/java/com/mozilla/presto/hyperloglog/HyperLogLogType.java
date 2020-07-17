@@ -20,57 +20,52 @@ import com.facebook.presto.spi.block.BlockBuilder;
 import com.facebook.presto.spi.type.AbstractVariableWidthType;
 import com.facebook.presto.spi.type.SqlVarbinary;
 import com.facebook.presto.spi.type.TypeSignature;
-import com.fasterxml.jackson.annotation.JsonCreator;
 import io.airlift.slice.Slice;
 
-public class HyperLogLogType extends AbstractVariableWidthType
-{
+public class HyperLogLogType extends AbstractVariableWidthType {
+
     public static final HyperLogLogType HYPER_LOG_LOG = new HyperLogLogType();
     public static final String TYPE = "HLL";
 
-    @JsonCreator
-    public HyperLogLogType()
-    {
+    private HyperLogLogType() {
         super(new TypeSignature(HyperLogLogType.TYPE), Slice.class);
     }
 
+    protected HyperLogLogType(TypeSignature signature) {
+        super(signature, Slice.class);
+    }
+
     @Override
-    public void appendTo(Block block, int position, BlockBuilder blockBuilder)
-    {
+    public void appendTo(Block block, int position, BlockBuilder blockBuilder) {
         if (block.isNull(position)) {
             blockBuilder.appendNull();
-        }
-        else {
-            block.writeBytesTo(position, 0, block.getLength(position), blockBuilder);
+        } else {
+            block.writeBytesTo(position, 0, block.getSliceLength(position), blockBuilder);
             blockBuilder.closeEntry();
         }
     }
 
     @Override
-    public Slice getSlice(Block block, int position)
-    {
-        return block.getSlice(position, 0, block.getLength(position));
+    public Slice getSlice(Block block, int position) {
+        return block.getSlice(position, 0, block.getSliceLength(position));
     }
 
     @Override
-    public void writeSlice(BlockBuilder blockBuilder, Slice value)
-    {
+    public void writeSlice(BlockBuilder blockBuilder, Slice value) {
         writeSlice(blockBuilder, value, 0, value.length());
     }
 
     @Override
-    public void writeSlice(BlockBuilder blockBuilder, Slice value, int offset, int length)
-    {
+    public void writeSlice(BlockBuilder blockBuilder, Slice value, int offset, int length) {
         blockBuilder.writeBytes(value, offset, length).closeEntry();
     }
 
     @Override
-    public Object getObjectValue(ConnectorSession session, Block block, int position)
-    {
+    public Object getObjectValue(ConnectorSession session, Block block, int position) {
         if (block.isNull(position)) {
             return null;
         }
 
-        return new SqlVarbinary(block.getSlice(position, 0, block.getLength(position)).getBytes());
+        return new SqlVarbinary(block.getSlice(position, 0, block.getSliceLength(position)).getBytes());
     }
 }

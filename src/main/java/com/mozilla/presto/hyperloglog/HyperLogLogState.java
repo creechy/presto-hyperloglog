@@ -21,8 +21,7 @@ import com.twitter.algebird.DenseHLL;
 import javax.validation.constraints.NotNull;
 
 @AccumulatorStateMetadata(stateSerializerClass = HyperLogLogStateSerializer.class, stateFactoryClass = HyperLogLogStateFactory.class)
-public interface HyperLogLogState extends AccumulatorState
-{
+public interface HyperLogLogState extends AccumulatorState {
     @NotNull
     DenseHLL getHyperLogLog();
 

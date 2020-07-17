@@ -32,7 +32,7 @@ public final class HyperLogLogScalarFunctions
     private HyperLogLogScalarFunctions(){}
 
     @Description("Returns the approximate cardinality of a HLL")
-    @ScalarFunction("cardinality")
+    @ScalarFunction("hll_cardinality")
     @SqlType(StandardTypes.BIGINT)
     public static long hllCardinality(@SqlType(HyperLogLogType.TYPE) Slice hll)
     {

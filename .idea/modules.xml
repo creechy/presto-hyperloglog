@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/presto-hyperloglog.iml" filepath="$PROJECT_DIR$/presto-hyperloglog.iml" />
+      <module fileurl="file://$PROJECT_DIR$/presto-hyperloglog.iml" filepath="$PROJECT_DIR$/presto-hyperloglog.iml" />
     </modules>
   </component>
 </project>

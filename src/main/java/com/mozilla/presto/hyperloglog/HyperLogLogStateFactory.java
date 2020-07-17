@@ -15,105 +15,102 @@
 package com.mozilla.presto.hyperloglog;
 
 import com.facebook.presto.array.ObjectBigArray;
-import com.facebook.presto.operator.aggregation.state.AbstractGroupedAccumulatorState;
 import com.facebook.presto.spi.function.AccumulatorStateFactory;
+import com.facebook.presto.spi.function.GroupedAccumulatorState;
 import com.twitter.algebird.DenseHLL;
+import org.openjdk.jol.info.ClassLayout;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public class HyperLogLogStateFactory
-        implements AccumulatorStateFactory<HyperLogLogState>
-{
+        implements AccumulatorStateFactory<HyperLogLogState> {
     @Override
-    public HyperLogLogState createSingleState()
-    {
-       return new SingleHyperLogLogState();
+    public HyperLogLogState createSingleState() {
+        return new SingleHyperLogLogState();
     }
 
     @Override
-    public Class<? extends HyperLogLogState> getSingleStateClass()
-    {
+    public Class<? extends HyperLogLogState> getSingleStateClass() {
         return SingleHyperLogLogState.class;
     }
 
     @Override
-    public HyperLogLogState createGroupedState()
-    {
+    public HyperLogLogState createGroupedState() {
         return new GroupedHyperLogLogState();
     }
 
     @Override
-    public Class<? extends HyperLogLogState> getGroupedStateClass()
-    {
+    public Class<? extends HyperLogLogState> getGroupedStateClass() {
         return GroupedHyperLogLogState.class;
     }
 
     public static class GroupedHyperLogLogState
-            extends AbstractGroupedAccumulatorState
-            implements HyperLogLogState
-    {
+            implements GroupedAccumulatorState, HyperLogLogState {
         private final ObjectBigArray<DenseHLL> bfs = new ObjectBigArray<>();
-        private long size;
+        private long groupId;
+        private long memoryUsage;
 
         @Override
-        public void ensureCapacity(long size)
+        public void setGroupId(long groupId)
         {
+            this.groupId = groupId;
+        }
+
+        @Override
+        public void addMemoryUsage(int memory)
+        {
+            memoryUsage += memory;
+        }
+
+        @Override
+        public void ensureCapacity(long size) {
             bfs.ensureCapacity(size);
         }
 
         @Override
-        public DenseHLL getHyperLogLog()
-        {
-            return bfs.get(getGroupId());
+        public DenseHLL getHyperLogLog() {
+            return bfs.get(groupId);
         }
 
         @Override
-        public void setHyperLogLog(DenseHLL hll)
-        {
+        public void setHyperLogLog(DenseHLL hll) {
             checkNotNull(hll, "value is null");
-            bfs.set(getGroupId(), hll);
+            bfs.set(groupId, hll);
         }
 
         @Override
-        public void addMemoryUsage(int value)
-        {
-            size += value;
-        }
-
-        @Override
-        public long getEstimatedSize()
-        {
-            return size + bfs.sizeOf();
+        public long getEstimatedSize() {
+            return memoryUsage + bfs.sizeOf();
         }
     }
 
     public static class SingleHyperLogLogState
-            implements HyperLogLogState
-    {
+            implements HyperLogLogState {
+        private static final int INSTANCE_SIZE = ClassLayout.parseClass(SingleHyperLogLogState.class).instanceSize();
         private DenseHLL hll;
 
         @Override
-        public DenseHLL getHyperLogLog()
-        {
+        public DenseHLL getHyperLogLog() {
             return hll;
         }
 
         @Override
-        public void setHyperLogLog(DenseHLL hll)
-        {
+        public void setHyperLogLog(DenseHLL hll) {
             this.hll = hll;
         }
 
         @Override
-        public void addMemoryUsage(int value)
-        {
+        public void addMemoryUsage(int value) {
             // noop
         }
 
         @Override
-        public long getEstimatedSize()
-        {
-            return hll.size();
+        public long getEstimatedSize() {
+            long estimatedSize = INSTANCE_SIZE;
+            if (hll != null) {
+                estimatedSize += hll.size();
+            }
+            return estimatedSize;
         }
     }
 }
