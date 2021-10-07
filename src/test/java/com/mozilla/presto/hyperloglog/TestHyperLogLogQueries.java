@@ -67,10 +67,10 @@ public class TestHyperLogLogQueries
 
         HyperLogLogPlugin plugin = new HyperLogLogPlugin();
         for (Type type : plugin.getTypes()) {
-            localQueryRunner.getTypeManager().addType(type);
+            localQueryRunner.getFunctionAndTypeManager().addType(type);
         }
         for (ParametricType parametricType : plugin.getParametricTypes()) {
-            localQueryRunner.getTypeManager().addParametricType(parametricType);
+            localQueryRunner.getFunctionAndTypeManager().addParametricType(parametricType);
         }
 
         localQueryRunner.getMetadata().registerBuiltInFunctions(extractFunctions(plugin.getFunctions()));
