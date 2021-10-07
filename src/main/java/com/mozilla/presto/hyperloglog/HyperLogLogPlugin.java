@@ -14,8 +14,8 @@
 
 package com.mozilla.presto.hyperloglog;
 
+import com.facebook.presto.common.type.Type;
 import com.facebook.presto.spi.Plugin;
-import com.facebook.presto.spi.type.Type;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 

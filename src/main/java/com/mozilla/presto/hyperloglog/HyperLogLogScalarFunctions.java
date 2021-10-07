@@ -14,18 +14,20 @@
 
 package com.mozilla.presto.hyperloglog;
 
+import com.facebook.presto.common.type.StandardTypes;
 import com.facebook.presto.spi.function.Description;
 import com.facebook.presto.spi.function.ScalarFunction;
 import com.facebook.presto.spi.function.ScalarOperator;
 import com.facebook.presto.spi.function.SqlType;
-import com.facebook.presto.spi.type.StandardTypes;
 import com.twitter.algebird.DenseHLL;
 import com.twitter.algebird.HyperLogLog;
 import com.twitter.algebird.HyperLogLogMonoid;
 import io.airlift.slice.Slice;
 import io.airlift.slice.Slices;
 
-import static com.facebook.presto.spi.function.OperatorType.CAST;
+import static com.facebook.presto.common.function.OperatorType.CAST;
+
+//import static com.facebook.presto.spi.function.OperatorType.CAST;
 
 public final class HyperLogLogScalarFunctions
 {

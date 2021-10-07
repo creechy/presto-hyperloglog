@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.facebook.presto</groupId>
         <artifactId>presto-root</artifactId>
-        <version>0.235.1</version>
+        <version>0.236</version>
     </parent>
 
     <artifactId>presto-hyperloglog</artifactId>
@@ -24,6 +24,12 @@
         <dependency>
             <groupId>com.facebook.presto</groupId>
             <artifactId>presto-array</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.facebook.presto</groupId>
+            <artifactId>presto-common</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>

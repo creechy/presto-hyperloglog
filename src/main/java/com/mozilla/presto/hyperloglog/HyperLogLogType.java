@@ -14,13 +14,12 @@
 
 package com.mozilla.presto.hyperloglog;
 
-import com.facebook.presto.spi.ConnectorSession;
-import com.facebook.presto.spi.block.Block;
-import com.facebook.presto.spi.block.BlockBuilder;
-import com.facebook.presto.spi.function.SqlFunctionProperties;
-import com.facebook.presto.spi.type.AbstractVariableWidthType;
-import com.facebook.presto.spi.type.SqlVarbinary;
-import com.facebook.presto.spi.type.TypeSignature;
+import com.facebook.presto.common.block.Block;
+import com.facebook.presto.common.block.BlockBuilder;
+import com.facebook.presto.common.function.SqlFunctionProperties;
+import com.facebook.presto.common.type.AbstractVariableWidthType;
+import com.facebook.presto.common.type.SqlVarbinary;
+import com.facebook.presto.common.type.TypeSignature;
 import io.airlift.slice.Slice;
 
 public class HyperLogLogType extends AbstractVariableWidthType {
@@ -55,17 +54,14 @@ public class HyperLogLogType extends AbstractVariableWidthType {
         return new SqlVarbinary(block.getSlice(position, 0, block.getSliceLength(position)).getBytes());
     }
 
-    @Override
     public Slice getSlice(Block block, int position) {
         return block.getSlice(position, 0, block.getSliceLength(position));
     }
 
-    @Override
     public void writeSlice(BlockBuilder blockBuilder, Slice value) {
         writeSlice(blockBuilder, value, 0, value.length());
     }
 
-    @Override
     public void writeSlice(BlockBuilder blockBuilder, Slice value, int offset, int length) {
         blockBuilder.writeBytes(value, offset, length).closeEntry();
     }
