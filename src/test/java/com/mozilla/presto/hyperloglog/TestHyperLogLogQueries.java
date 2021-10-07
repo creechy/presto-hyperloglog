@@ -73,7 +73,7 @@ public class TestHyperLogLogQueries
             localQueryRunner.getTypeManager().addParametricType(parametricType);
         }
 
-        localQueryRunner.getMetadata().addFunctions(extractFunctions(plugin.getFunctions()));
+        localQueryRunner.getMetadata().registerBuiltInFunctions(extractFunctions(plugin.getFunctions()));
 
         return localQueryRunner;
     }
