@@ -18,6 +18,7 @@ import com.facebook.presto.Session;
 import com.facebook.presto.common.type.ParametricType;
 import com.facebook.presto.common.type.Type;
 import com.facebook.presto.testing.LocalQueryRunner;
+import com.facebook.presto.testing.QueryRunner;
 import com.facebook.presto.tests.AbstractTestQueryFramework;
 import com.facebook.presto.tpch.TpchConnectorFactory;
 import com.google.common.collect.ImmutableMap;
@@ -30,7 +31,7 @@ import static com.facebook.presto.tpch.TpchMetadata.TINY_SCHEMA_NAME;
 public class TestHyperLogLogQueries
         extends AbstractTestQueryFramework {
     public TestHyperLogLogQueries() {
-        super(TestHyperLogLogQueries::createLocalQueryRunner);
+        super();
     }
 
     @Test
@@ -52,7 +53,8 @@ public class TestHyperLogLogQueries
         assertQuery("select hll_cardinality(cast(cast(hll_create('foo', 4) as varbinary) as HLL))", "select 1");
     }
 
-    private static LocalQueryRunner createLocalQueryRunner() {
+    @Override
+    protected QueryRunner createQueryRunner() {
         Session.SessionBuilder sessionBuilder = testSessionBuilder()
                 .setCatalog("tpch")
                 .setSchema(TINY_SCHEMA_NAME)
